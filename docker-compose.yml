@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  bot:
+    image: 'bot-service:latest'
+    ports:
+      - "8080:8080"
+    build:
+      context: /Users/alina/Desktop/projects/bot/davydova-telegram-bot-trunk
+      dockerfile: Dockerfile
+    container_name: bot
+
+
+  middle:
+    image: 'middle-service:latest'
+    ports:
+      - "7070:7070"
+    build:
+      context: /Users/alina/Desktop/projects/bot/davydova-middle-service-trunk
+      dockerfile: Dockerfile
+    container_name: middle
+
+
+  back:
+    image: 'back-service:latest'
+    ports:
+      - "6060:6060"
+    build:
+      context: /Users/alina/Desktop/projects/bot/back-service
+      dockerfile: Dockerfile
+    container_name: back
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/gpbf
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+
+  db:
+    image: 'postgres'
+    container_name: db-gpbf
+    environment:
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=gpbf
+    volumes:
+      - /Users/alina/homeDockerBot/var/lib/postgresql/data:/var/lib/postgresql/data
+      - /Users/alina/Desktop/projects/gpfW/back-service/src/main/resources/static/db/initDB.sql:/docker-entrypoint-initdb.d/data.sql # name in container is arbitrary
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_PASSWORD: "Hjhu678jkjGhji8"
+      PGADMIN_DEFAULT_EMAIL: "mail@example.com"
+    restart: always
+    ports:
+      - "40080:80"
+volumes:
+  pgdata:
+    driver: local
+  pgconf:
+    driver: local
+  pglog:
+    driver: local
+networks:
+  myNetwork:
+    driver: "bridge"
+
+
